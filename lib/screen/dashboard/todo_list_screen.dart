@@ -17,6 +17,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch initial todos if list is empty
     Future.microtask(() {
       final provider = Provider.of<TodoProvider>(context, listen: false);
       if (provider.posts.isEmpty) {
@@ -24,9 +25,12 @@ class _TodoListScreenState extends State<TodoListScreen> {
       }
     });
 
+    // Fetch next page on scroll to bottom
     _scrollController.addListener(() {
       final provider = Provider.of<TodoProvider>(context, listen: false);
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !provider.isLoading) {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !provider.isLoading) {
         provider.fetchPosts();
       }
     });
@@ -41,15 +45,21 @@ class _TodoListScreenState extends State<TodoListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: const Text(' Todos'),
-      )),
+      appBar: AppBar(
+        title: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: const Text(' Todos'),
+        ),
+      ),
       body: Consumer<TodoProvider>(
         builder: (context, postProvider, child) {
+          // Show error message if fetch failed
           if (postProvider.errorMessage != null) {
             return Center(
-              child: Text(postProvider.errorMessage!, style: TextStyle(color: Colors.red)),
+              child: Text(
+                postProvider.errorMessage!,
+                style: TextStyle(color: Colors.red),
+              ),
             );
           }
 
@@ -60,31 +70,36 @@ class _TodoListScreenState extends State<TodoListScreen> {
             itemCount: posts.length + (postProvider.hasMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == posts.length) {
-                return const Center(child: Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: CircularProgressIndicator(),
-                ));
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               }
 
               final post = posts[index];
               return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
                 child: ListTile(
-                  title: Text("${post.title[0].toUpperCase()}${post.title.substring(1)}",  maxLines: 2,
-                    overflow: TextOverflow.ellipsis,),
+                  title: Text(
+                    "${post.title[0].toUpperCase()}${post.title.substring(1)}",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   subtitle: Text('ID: ${post.id}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -105,8 +120,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           );
         },
       ),
-      floatingActionButton:
-      FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
             context: context,
@@ -136,7 +150,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
                           isLocal: true,
                           userId: 0,
                         );
-                        Provider.of<TodoProvider>(context, listen: false).addTodo(newTodo);
+                        Provider.of<TodoProvider>(
+                          context,
+                          listen: false,
+                        ).addTodo(newTodo);
                         Navigator.of(context).pop();
                       }
                     },

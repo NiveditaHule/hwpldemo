@@ -28,6 +28,7 @@ class TodoProvider with ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
+  // Fetches todos from API with pagination, local merge, and error handling
   Future<void> fetchPosts() async {
     if (_isLoading || !_hasMore) return;
 
@@ -35,7 +36,7 @@ class TodoProvider with ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // ✅ Check Internet Connection
+    // Check Internet Connection
     final connectivity = await Connectivity().checkConnectivity();
     if (connectivity == ConnectivityResult.none) {
       _errorMessage = 'No internet connection';
@@ -82,12 +83,14 @@ class TodoProvider with ChangeNotifier {
     }
   }
 
+  // Adds a new todo to Hive and updates the UI list
   void addTodo(TodoEntity todo) {
     _todoBox.put(todo.id.toString(), todo);
     _posts.insert(0, todo);
     notifyListeners();
   }
 
+  // Deletes a todo from Hive or marks API todo as deleted, then updates the UI list
   void deleteTodo(TodoEntity todo) {
     if (todo.isLocal) {
       _todoBox.delete(todo.id.toString());
@@ -98,6 +101,7 @@ class TodoProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Toggles the completed status of a todo and updates Hive or override box accordingly
   void toggleCompleted(TodoEntity todo) {
     final index = _posts.indexWhere((t) => t.id == todo.id);
     if (index == -1) return;
